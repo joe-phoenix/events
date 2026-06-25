@@ -267,6 +267,8 @@ async function init() {
         page++;
       }
       if (all.length) {
+        // Baserow single-select fields return {value, id, color} objects
+        const val = f => f && typeof f === "object" ? (f.value || "") : (f || "");
         data = all.map(r => ({
           id: r.id,
           title: r["Event Name"] || "",
@@ -274,8 +276,8 @@ async function init() {
           endDate: r["End Date"] || r["Start Date"] || "",
           country: r["Country"] || "",
           city: r["City"] || "",
-          category: r["Category"] || "Other",
-          format: r["Format"] || "In-Person",
+          category: val(r["Category"]) || "Other",
+          format: val(r["Format"]) || "In-Person",
           description: r["Description"] || "",
           link: r["Link"] || "#",
         }));
