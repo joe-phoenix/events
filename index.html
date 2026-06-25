@@ -5,123 +5,269 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Africa Events — Pan-African Calendar</title>
   <meta name="description" content="A pan-African events calendar covering technology, business, culture, media, policy and more across the continent." />
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #f8fafc; color: #1e293b; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* HEADER */
+    #app-header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 28px; box-shadow: 0 1px 3px rgba(0,0,0,.04); position: sticky; top: 0; z-index: 50; }
+    .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg,#2563eb,#60a5fa); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .logo-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #1e293b; line-height: 1; }
+    .logo-sub { font-size: 10px; color: #94a3b8; letter-spacing: .07em; text-transform: uppercase; margin-top: 1px; }
+    .view-toggle { display: flex; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 3px; }
+    .view-btn { padding: 7px 18px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; background: transparent; color: #94a3b8; font-family: inherit; }
+    .view-btn.active { background: #2563eb; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    .demo-badge { font-size: 11px; color: #94a3b8; background: #f8fafc; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+
+    /* MAIN */
+    #main { max-width: 1200px; margin: 0 auto; padding: 24px 28px; }
+
+    /* FILTER BAR */
+    .filter-bar { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 22px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .search-wrap { position: relative; display: inline-block; }
+    .search-wrap::before { content: "🔍"; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 12px; pointer-events: none; }
+    .search-input { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 14px 8px 36px; color: #1e293b; font-size: 13px; outline: none; width: 220px; transition: border .15s; box-shadow: 0 1px 2px rgba(0,0,0,.04); font-family: inherit; }
+    .search-input:focus { border-color: #2563eb; }
+    .search-input::placeholder { color: #94a3b8; }
+    .divider { width: 1px; height: 28px; background: #e2e8f0; }
+    .select-wrap { position: relative; display: inline-block; }
+    .select-wrap::after { content: "▾"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #94a3b8; font-size: 12px; }
+    .filter-select { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 28px 8px 12px; color: #374151; font-size: 13px; cursor: pointer; outline: none; box-shadow: 0 1px 2px rgba(0,0,0,.04); transition: border .15s; appearance: none; font-family: inherit; }
+    .filter-select:focus { border-color: #2563eb; }
+    .clear-btn { margin-left: auto; background: none; border: none; color: #94a3b8; font-size: 12px; cursor: pointer; font-weight: 500; padding: 4px 8px; border-radius: 6px; font-family: inherit; }
+    .clear-btn:hover { color: #dc2626; }
+
+    /* CALENDAR */
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #1e293b; }
+    .cal-title span { color: #2563eb; }
+    .cal-nav { display: flex; gap: 8px; }
+    .nav-btn { background: #fff; border: 1px solid #e2e8f0; color: #475569; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s; box-shadow: 0 1px 2px rgba(0,0,0,.04); font-family: inherit; }
+    .nav-btn:hover { border-color: #2563eb; color: #1e293b; background: #eff6ff; }
+    .day-headers { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+    .day-hdr { text-align: center; font-size: 11px; font-weight: 700; color: #94a3b8; padding: 6px 0; letter-spacing: .06em; text-transform: uppercase; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-cell { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; min-height: 90px; padding: 6px; transition: border-color .15s; }
+    .cal-cell:hover { border-color: #94a3b8; }
+    .cal-cell.today { border-color: #2563eb !important; box-shadow: 0 0 0 2px #bfdbfe55; }
+    .cal-cell.empty { background: transparent; border: none; }
+    .day-num { font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 4px; text-align: right; }
+    .cal-cell.today .day-num { font-weight: 700; color: #2563eb; }
+    .ev-pill { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; font-weight: 500; border-left: 3px solid; transition: opacity .1s; }
+    .ev-pill:hover { opacity: .75; }
+    .more-label { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+    /* LIST */
+    .list-header { display: flex; align-items: center; margin-bottom: 18px; }
+    .list-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #1e293b; }
+    .list-count { color: #2563eb; font-size: 16px; font-family: Inter, sans-serif; font-weight: 600; margin-left: 8px; }
+    .list-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 10px; cursor: pointer; transition: all .18s; display: flex; gap: 16px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .list-card:hover { border-color: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .date-block { min-width: 64px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 8px; flex-shrink: 0; }
+    .date-block .day { font-size: 22px; font-weight: 700; color: #1e293b; line-height: 1; }
+    .date-block .mon { font-size: 11px; color: #2563eb; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+    .date-block .range { font-size: 9px; color: #94a3b8; margin-top: 4px; }
+    .card-body { flex: 1; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+    .card-title { font-weight: 600; font-size: 15px; color: #1e293b; line-height: 1.3; }
+    .badges { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: .03em; }
+    .card-loc { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: #64748b; line-height: 1.6; }
+    .empty-state { text-align: center; padding: 60px; color: #94a3b8; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.hidden { display: none; }
+    .modal { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; max-width: 520px; width: 100%; padding: 32px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.15); }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #64748b; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+    .modal-badges { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin: 0 0 14px; color: #1e293b; line-height: 1.3; }
+    .modal-meta { display: flex; gap: 28px; margin-bottom: 16px; flex-wrap: wrap; }
+    .meta-label { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 3px; }
+    .meta-val { font-size: 14px; color: #1e293b; font-weight: 500; }
+    .meta-val span { color: #94a3b8; }
+    .modal-divider { border: none; border-top: 1px solid #f1f5f9; margin: 16px 0; }
+    .modal-desc { font-size: 14px; color: #475569; line-height: 1.7; margin-bottom: 16px; }
+    .add-cal-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+    .add-cal-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+    .cal-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cal-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; color: #374151; transition: all .15s; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,.04); font-family: inherit; }
+    .cal-btn:hover { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+    .modal-footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid #f1f5f9; }
+    .visit-btn { display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: #fff; padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 14px; text-decoration: none; }
+    .visit-btn:hover { background: #1d4ed8; }
+    .no-link { font-size: 13px; color: #94a3b8; font-style: italic; }
+    .event-url { font-size: 12px; color: #94a3b8; word-break: break-all; }
+
+    /* LOADING */
+    .loading { text-align: center; padding: 80px; color: #94a3b8; }
+    .loading-icon { font-size: 32px; margin-bottom: 12px; }
+  </style>
 </head>
-<body style="margin:0;padding:0;">
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+<body>
 
-    // ─── CONFIG ───────────────────────────────────────────────────────────────
-    // Replace with your Cloudflare Worker URL once deployed
-    const WORKER_URL = "https://africa-events.joseph-kuuire.workers.dev/";
+  <!-- HEADER -->
+  <header id="app-header">
+    <div class="header-inner">
+      <div class="logo-wrap">
+        <div class="logo-icon">🌍</div>
+        <div>
+          <div class="logo-title">Africa Events</div>
+          <div class="logo-sub">Pan-African Calendar</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="demo-badge" id="demo-badge" style="display:none;">Demo data — connect Baserow to go live</div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-calendar" onclick="setView('calendar')">Calendar</button>
+          <button class="view-btn" id="btn-list" onclick="setView('list')">List</button>
+        </div>
+      </div>
+    </div>
+  </header>
 
-    // ─── MOCK DATA ────────────────────────────────────────────────────────────
-    const MOCK_EVENTS = [
-      { id: 1, title: "Africa Tech Summit", date: "2026-06-03", endDate: "2026-06-05", country: "Kenya", city: "Nairobi", category: "Technology", format: "In-Person", description: "East Africa's largest technology gathering bringing together founders, investors, and policymakers.", link: "#" },
-      { id: 2, title: "Ghana Investment Forum", date: "2026-06-08", endDate: "2026-06-08", country: "Ghana", city: "Accra", category: "Business", format: "In-Person", description: "Annual forum connecting Ghanaian businesses with international investors.", link: "#" },
-      { id: 3, title: "Lagos Creative Festival", date: "2026-06-10", endDate: "2026-06-14", country: "Nigeria", city: "Lagos", category: "Arts & Culture", format: "In-Person", description: "Celebrating African creative industries across film, music, fashion and visual arts.", link: "#" },
-      { id: 4, title: "Pan-African Media Conference", date: "2026-06-12", endDate: "2026-06-13", country: "South Africa", city: "Johannesburg", category: "Media", format: "Hybrid", description: "Bringing together African journalists, editors and media executives to discuss the future of the industry.", link: "#" },
-      { id: 5, title: "Kigali Fintech Week", date: "2026-06-15", endDate: "2026-06-19", country: "Rwanda", city: "Kigali", category: "Technology", format: "In-Person", description: "Showcasing financial technology innovations driving financial inclusion across the continent.", link: "#" },
-      { id: 6, title: "Africa Climate Forum", date: "2026-06-17", endDate: "2026-06-18", country: "Ethiopia", city: "Addis Ababa", category: "Policy", format: "In-Person", description: "Multi-stakeholder dialogue on climate policy and green transition strategies.", link: "#" },
-      { id: 7, title: "Dakar Design Week", date: "2026-06-20", endDate: "2026-06-26", country: "Senegal", city: "Dakar", category: "Arts & Culture", format: "In-Person", description: "West Africa's premier design and architecture showcase.", link: "#" },
-      { id: 8, title: "AfricaComms Virtual Summit", date: "2026-06-22", endDate: "2026-06-22", country: "Virtual", city: "Online", category: "Technology", format: "Virtual", description: "Telecommunications and connectivity outlook for Sub-Saharan Africa.", link: "#" },
-      { id: 9, title: "East Africa Startup Awards", date: "2026-06-24", endDate: "2026-06-24", country: "Tanzania", city: "Dar es Salaam", category: "Business", format: "In-Person", description: "Recognising the most impactful startups building in East Africa.", link: "#" },
-      { id: 10, title: "Cairo Book Fair", date: "2026-07-01", endDate: "2026-07-12", country: "Egypt", city: "Cairo", category: "Arts & Culture", format: "In-Person", description: "One of the oldest and largest book fairs in the Arab and African world.", link: "#" },
-      { id: 11, title: "West Africa Health Summit", date: "2026-07-06", endDate: "2026-07-07", country: "Ghana", city: "Accra", category: "Health", format: "In-Person", description: "Addressing public health challenges and innovations across West Africa.", link: "#" },
-      { id: 12, title: "Africa Agri-Tech Forum", date: "2026-07-09", endDate: "2026-07-10", country: "Nigeria", city: "Abuja", category: "Agriculture", format: "Hybrid", description: "Technology and innovation in African agriculture and food systems.", link: "#" },
-      { id: 13, title: "Nairobi Fashion Week", date: "2026-07-14", endDate: "2026-07-18", country: "Kenya", city: "Nairobi", category: "Arts & Culture", format: "In-Person", description: "East Africa's biggest fashion platform showcasing local and continental designers.", link: "#" },
-      { id: 14, title: "Lusaka Economic Forum", date: "2026-07-20", endDate: "2026-07-21", country: "Zambia", city: "Lusaka", category: "Business", format: "In-Person", description: "Southern African economic outlook and trade partnerships dialogue.", link: "#" },
-      { id: 15, title: "AfroTech Policy Webinar", date: "2026-07-23", endDate: "2026-07-23", country: "Virtual", city: "Online", category: "Policy", format: "Virtual", description: "Examining how African governments are regulating emerging technologies.", link: "#" },
-    ];
+  <!-- MAIN -->
+  <div id="main">
 
-    // ─── COLOURS & CONSTANTS ─────────────────────────────────────────────────
-    const CATEGORY_COLORS = {
-      "Technology":     { bg: "#e0f2fe", dot: "#0284c7", text: "#0369a1" },
-      "Business":       { bg: "#fef9c3", dot: "#ca8a04", text: "#92400e" },
-      "Arts & Culture": { bg: "#f3e8ff", dot: "#9333ea", text: "#6b21a8" },
-      "Media":          { bg: "#d1fae5", dot: "#059669", text: "#065f46" },
-      "Policy":         { bg: "#fee2e2", dot: "#dc2626", text: "#991b1b" },
-      "Health":         { bg: "#dcfce7", dot: "#16a34a", text: "#14532d" },
-      "Agriculture":    { bg: "#ffedd5", dot: "#ea580c", text: "#7c2d12" },
-    };
-    const DEFAULT_COLOR = { bg: "#f1f5f9", dot: "#64748b", text: "#475569" };
-    const FORMAT_ICONS = { "In-Person": "📍", "Virtual": "💻", "Hybrid": "🔀" };
-    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <input class="search-input" id="search-input" type="text" placeholder="Search events or cities…" oninput="applyFilters()" />
+      </div>
+      <div class="divider"></div>
+      <div class="select-wrap">
+        <select class="filter-select" id="filter-category" onchange="applyFilters()">
+          <option value="All">All Categories</option>
+        </select>
+      </div>
+      <div class="select-wrap">
+        <select class="filter-select" id="filter-format" onchange="applyFilters()">
+          <option value="All">All Formats</option>
+          <option value="In-Person">📍 In-Person</option>
+          <option value="Virtual">💻 Virtual</option>
+          <option value="Hybrid">🔀 Hybrid</option>
+        </select>
+      </div>
+      <div class="select-wrap">
+        <select class="filter-select" id="filter-country" onchange="applyFilters()">
+          <option value="All">All Countries</option>
+        </select>
+      </div>
+      <button class="clear-btn" id="clear-btn" style="display:none;" onclick="clearFilters()">✕ Clear filters</button>
+    </div>
 
-    // ─── HELPERS ─────────────────────────────────────────────────────────────
-    function parseDate(str) { return new Date(str + "T00:00:00"); }
-    function sameDay(a, b) { return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
-    function eventSpansDay(ev, day) {
-      const s = parseDate(ev.date), e = parseDate(ev.endDate || ev.date);
-      return day >= s && day <= e;
-    }
+    <!-- VIEWS -->
+    <div id="loading-state" class="loading">
+      <div class="loading-icon">⏳</div>
+      <div>Loading events…</div>
+    </div>
+    <div id="view-calendar" style="display:none;">
+      <div class="cal-header">
+        <h2 class="cal-title" id="cal-title">June <span>2026</span></h2>
+        <div class="cal-nav">
+          <button class="nav-btn" onclick="changeMonth(-1)">← Prev</button>
+          <button class="nav-btn" onclick="goToday()">Today</button>
+          <button class="nav-btn" onclick="changeMonth(1)">Next →</button>
+        </div>
+      </div>
+      <div class="day-headers">
+        <div class="day-hdr">Sun</div><div class="day-hdr">Mon</div><div class="day-hdr">Tue</div>
+        <div class="day-hdr">Wed</div><div class="day-hdr">Thu</div><div class="day-hdr">Fri</div><div class="day-hdr">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div id="view-list" style="display:none;">
+      <div class="list-header">
+        <h2 class="list-title">All Events</h2>
+        <span class="list-count" id="list-count"></span>
+      </div>
+      <div id="list-body"></div>
+    </div>
+  </div>
 
-    // ─── CALENDAR EXPORT ─────────────────────────────────────────────────────
-    function buildICSContent(ev) {
-      const fmt = d => d.replace(/-/g,"");
-      const endObj = new Date(ev.endDate + "T00:00:00");
-      endObj.setDate(endObj.getDate() + 1);
-      const end = endObj.toISOString().slice(0,10).replace(/-/g,"");
-      const loc = ev.city !== "Online" ? `${ev.city}, ${ev.country}` : "Online";
-      return [
-        "BEGIN:VCALENDAR","VERSION:2.0",
-        "PRODID:-//Africa Events//Labari Media//EN",
-        "CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",
-        `UID:africa-events-${ev.id}@labarijournal.com`,
-        `SUMMARY:${ev.title}`,
-        `DTSTART;VALUE=DATE:${fmt(ev.date)}`,
-        `DTEND;VALUE=DATE:${end}`,
-        `LOCATION:${loc}`,
-        `DESCRIPTION:${(ev.description||"").replace(/\n/g,"\\n")}`,
-        `URL:${ev.link && ev.link !== "#" ? ev.link : ""}`,
-        "END:VEVENT","END:VCALENDAR",
-      ].join("\r\n");
-    }
+  <!-- MODAL -->
+  <div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal-box">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <div class="modal-badges" id="modal-badges"></div>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <div class="modal-meta" id="modal-meta"></div>
+      <hr class="modal-divider">
+      <p class="modal-desc" id="modal-desc"></p>
+      <div class="add-cal-box">
+        <div class="add-cal-label">Add to Calendar</div>
+        <div class="cal-btns" id="cal-btns"></div>
+      </div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
 
-    function downloadICS(ev) {
-      const blob = new Blob([buildICSContent(ev)], { type: "text/calendar;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${ev.title.replace(/[^a-z0-9]/gi,"-").toLowerCase()}.ics`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+<script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const WORKER_URL = "https://africa-events.joseph-kuuire.workers.dev/";
 
-    function googleCalendarURL(ev) {
-      const fmt = d => d.replace(/-/g,"");
-      const endObj = new Date(ev.endDate + "T00:00:00");
-      endObj.setDate(endObj.getDate() + 1);
-      const end = endObj.toISOString().slice(0,10).replace(/-/g,"");
-      const loc = ev.city !== "Online" ? `${ev.city}, ${ev.country}` : "Online";
-      const p = new URLSearchParams({ action:"TEMPLATE", text:ev.title, dates:`${fmt(ev.date)}/${end}`, details:ev.description||"", location:loc });
-      return `https://calendar.google.com/calendar/render?${p}`;
-    }
+// ─── MOCK DATA ───────────────────────────────────────────────────────────────
+const MOCK_EVENTS = [
+  { id:1,  title:"Africa Tech Summit",          date:"2026-06-03", endDate:"2026-06-05", country:"Kenya",        city:"Nairobi",       category:"Technology",    format:"In-Person", description:"East Africa's largest technology gathering bringing together founders, investors, and policymakers.",                                         link:"#" },
+  { id:2,  title:"Ghana Investment Forum",       date:"2026-06-08", endDate:"2026-06-08", country:"Ghana",        city:"Accra",         category:"Business",      format:"In-Person", description:"Annual forum connecting Ghanaian businesses with international investors.",                                                                  link:"#" },
+  { id:3,  title:"Lagos Creative Festival",      date:"2026-06-10", endDate:"2026-06-14", country:"Nigeria",      city:"Lagos",         category:"Arts & Culture",format:"In-Person", description:"Celebrating African creative industries across film, music, fashion and visual arts.",                                                       link:"#" },
+  { id:4,  title:"Pan-African Media Conference", date:"2026-06-12", endDate:"2026-06-13", country:"South Africa", city:"Johannesburg",  category:"Media",         format:"Hybrid",    description:"Bringing together African journalists, editors and media executives to discuss the future of the industry.",                                 link:"#" },
+  { id:5,  title:"Kigali Fintech Week",          date:"2026-06-15", endDate:"2026-06-19", country:"Rwanda",       city:"Kigali",        category:"Technology",    format:"In-Person", description:"Showcasing financial technology innovations driving financial inclusion across the continent.",                                              link:"#" },
+  { id:6,  title:"Africa Climate Forum",         date:"2026-06-17", endDate:"2026-06-18", country:"Ethiopia",     city:"Addis Ababa",   category:"Policy",        format:"In-Person", description:"Multi-stakeholder dialogue on climate policy and green transition strategies.",                                                             link:"#" },
+  { id:7,  title:"Dakar Design Week",            date:"2026-06-20", endDate:"2026-06-26", country:"Senegal",      city:"Dakar",         category:"Arts & Culture",format:"In-Person", description:"West Africa's premier design and architecture showcase.",                                                                                  link:"#" },
+  { id:8,  title:"AfricaComms Virtual Summit",   date:"2026-06-22", endDate:"2026-06-22", country:"Virtual",      city:"Online",        category:"Technology",    format:"Virtual",   description:"Telecommunications and connectivity outlook for Sub-Saharan Africa.",                                                                       link:"#" },
+  { id:9,  title:"East Africa Startup Awards",   date:"2026-06-24", endDate:"2026-06-24", country:"Tanzania",     city:"Dar es Salaam", category:"Business",      format:"In-Person", description:"Recognising the most impactful startups building in East Africa.",                                                                         link:"#" },
+  { id:10, title:"Cairo Book Fair",              date:"2026-07-01", endDate:"2026-07-12", country:"Egypt",        city:"Cairo",         category:"Arts & Culture",format:"In-Person", description:"One of the oldest and largest book fairs in the Arab and African world.",                                                                  link:"#" },
+  { id:11, title:"West Africa Health Summit",    date:"2026-07-06", endDate:"2026-07-07", country:"Ghana",        city:"Accra",         category:"Health",        format:"In-Person", description:"Addressing public health challenges and innovations across West Africa.",                                                                   link:"#" },
+  { id:12, title:"Africa Agri-Tech Forum",       date:"2026-07-09", endDate:"2026-07-10", country:"Nigeria",      city:"Abuja",         category:"Agriculture",   format:"Hybrid",    description:"Technology and innovation in African agriculture and food systems.",                                                                        link:"#" },
+  { id:13, title:"Nairobi Fashion Week",         date:"2026-07-14", endDate:"2026-07-18", country:"Kenya",        city:"Nairobi",       category:"Arts & Culture",format:"In-Person", description:"East Africa's biggest fashion platform showcasing local and continental designers.",                                                        link:"#" },
+  { id:14, title:"Lusaka Economic Forum",        date:"2026-07-20", endDate:"2026-07-21", country:"Zambia",       city:"Lusaka",        category:"Business",      format:"In-Person", description:"Southern African economic outlook and trade partnerships dialogue.",                                                                        link:"#" },
+  { id:15, title:"AfroTech Policy Webinar",      date:"2026-07-23", endDate:"2026-07-23", country:"Virtual",      city:"Online",        category:"Policy",        format:"Virtual",   description:"Examining how African governments are regulating emerging technologies.",                                                                    link:"#" },
+];
 
-    function outlookURL(ev) {
-      const loc = ev.city !== "Online" ? `${ev.city}, ${ev.country}` : "Online";
-      const p = new URLSearchParams({ path:"/calendar/action/compose", rru:"addevent", subject:ev.title, startdt:ev.date, enddt:ev.endDate||ev.date, body:ev.description||"", location:loc });
-      return `https://outlook.live.com/calendar/0/deeplink/compose?${p}`;
-    }
+const CAT_COLORS = {
+  "Technology":     { bg:"#e0f2fe", dot:"#0284c7", text:"#0369a1" },
+  "Business":       { bg:"#fef9c3", dot:"#ca8a04", text:"#92400e" },
+  "Arts & Culture": { bg:"#f3e8ff", dot:"#9333ea", text:"#6b21a8" },
+  "Media":          { bg:"#d1fae5", dot:"#059669", text:"#065f46" },
+  "Policy":         { bg:"#fee2e2", dot:"#dc2626", text:"#991b1b" },
+  "Health":         { bg:"#dcfce7", dot:"#16a34a", text:"#14532d" },
+  "Agriculture":    { bg:"#ffedd5", dot:"#ea580c", text:"#7c2d12" },
+};
+const DEFAULT_COL = { bg:"#f1f5f9", dot:"#64748b", text:"#475569" };
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const FORMAT_ICONS = { "In-Person":"📍", "Virtual":"💻", "Hybrid":"🔀" };
 
-    // ─── FETCH ───────────────────────────────────────────────────────────────
-    async function fetchEvents() {
-      if (WORKER_URL.includes("YOUR-SUBDOMAIN")) return null;
-      try {
-        let all = [], page = 1, hasMore = true;
-        while (hasMore) {
-          const res = await fetch(`${WORKER_URL}?page=${page}`);
-          if (!res.ok) return null;
-          const data = await res.json();
-          all = all.concat(data.results || []);
-          hasMore = !!data.next;
-          page++;
-        }
-        return all.map(r => ({
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let allEvents = [];
+let filteredEvents = [];
+let currentView = "calendar";
+let currentYear = 2026, currentMonth = 5; // June 2026
+const today = new Date();
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+async function init() {
+  let data = null;
+  if (!WORKER_URL.includes("YOUR-SUBDOMAIN")) {
+    try {
+      let all = [], page = 1, hasMore = true;
+      while (hasMore) {
+        const res = await fetch(WORKER_URL + "?page=" + page);
+        if (!res.ok) break;
+        const json = await res.json();
+        all = all.concat(json.results || []);
+        hasMore = !!json.next;
+        page++;
+      }
+      if (all.length) {
+        data = all.map(r => ({
           id: r.id,
           title: r["Event Name"] || "",
           date: r["Start Date"] || "",
@@ -133,310 +279,300 @@
           description: r["Description"] || "",
           link: r["Link"] || "#",
         }));
-      } catch { return null; }
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  allEvents = data || MOCK_EVENTS;
+  if (!data) document.getElementById("demo-badge").style.display = "block";
+
+  buildFilterOptions();
+  applyFilters();
+  document.getElementById("loading-state").style.display = "none";
+  setView("calendar");
+}
+
+// ─── FILTERS ─────────────────────────────────────────────────────────────────
+function buildFilterOptions() {
+  const cats = [...new Set(allEvents.map(e => e.category))].sort();
+  const catSel = document.getElementById("filter-category");
+  cats.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; catSel.appendChild(o); });
+
+  const countries = ["Virtual", ...[...new Set(allEvents.map(e => e.country).filter(c => c !== "Virtual"))].sort()];
+  const ctySel = document.getElementById("filter-country");
+  countries.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; ctySel.appendChild(o); });
+}
+
+function applyFilters() {
+  const search = document.getElementById("search-input").value.toLowerCase();
+  const cat = document.getElementById("filter-category").value;
+  const fmt = document.getElementById("filter-format").value;
+  const cty = document.getElementById("filter-country").value;
+
+  filteredEvents = allEvents.filter(ev => {
+    if (cat !== "All" && ev.category !== cat) return false;
+    if (fmt !== "All" && ev.format !== fmt) return false;
+    if (cty !== "All" && ev.country !== cty) return false;
+    if (search && !ev.title.toLowerCase().includes(search) && !ev.city.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const hasFilters = cat !== "All" || fmt !== "All" || cty !== "All" || search;
+  document.getElementById("clear-btn").style.display = hasFilters ? "block" : "none";
+
+  if (currentView === "calendar") renderCalendar();
+  else renderList();
+}
+
+function clearFilters() {
+  document.getElementById("search-input").value = "";
+  document.getElementById("filter-category").value = "All";
+  document.getElementById("filter-format").value = "All";
+  document.getElementById("filter-country").value = "All";
+  applyFilters();
+}
+
+// ─── VIEW SWITCHING ──────────────────────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  document.getElementById("btn-calendar").classList.toggle("active", v === "calendar");
+  document.getElementById("btn-list").classList.toggle("active", v === "list");
+  document.getElementById("view-calendar").style.display = v === "calendar" ? "block" : "none";
+  document.getElementById("view-list").style.display = v === "list" ? "block" : "none";
+  if (v === "calendar") renderCalendar();
+  else renderList();
+}
+
+// ─── CALENDAR ────────────────────────────────────────────────────────────────
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  renderCalendar();
+}
+
+function goToday() {
+  currentYear = today.getFullYear();
+  currentMonth = today.getMonth();
+  renderCalendar();
+}
+
+function parseDate(str) { return new Date(str + "T00:00:00"); }
+
+function eventSpansDay(ev, day) {
+  const s = parseDate(ev.date), e = parseDate(ev.endDate || ev.date);
+  return day >= s && day <= e;
+}
+
+function renderCalendar() {
+  // Update title
+  const titleEl = document.getElementById("cal-title");
+  titleEl.innerHTML = MONTHS[currentMonth] + ' <span>' + currentYear + '</span>';
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const grid = document.getElementById("cal-grid");
+  grid.innerHTML = "";
+
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement("div");
+    empty.className = "cal-cell empty";
+    grid.appendChild(empty);
+  }
+
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const day = new Date(currentYear, currentMonth, d);
+    const isToday = day.getFullYear() === today.getFullYear() && day.getMonth() === today.getMonth() && day.getDate() === today.getDate();
+    const dayEvs = filteredEvents.filter(ev => eventSpansDay(ev, day));
+
+    const cell = document.createElement("div");
+    cell.className = "cal-cell" + (isToday ? " today" : "");
+
+    const num = document.createElement("div");
+    num.className = "day-num";
+    num.textContent = d;
+    cell.appendChild(num);
+
+    const shown = dayEvs.slice(0, 3);
+    shown.forEach(ev => {
+      const col = CAT_COLORS[ev.category] || DEFAULT_COL;
+      const pill = document.createElement("div");
+      pill.className = "ev-pill";
+      pill.style.cssText = "background:" + col.bg + ";color:" + col.text + ";border-left-color:" + col.dot;
+      pill.textContent = ev.title;
+      pill.title = ev.title;
+      pill.onclick = () => openModal(ev);
+      cell.appendChild(pill);
+    });
+
+    if (dayEvs.length > 3) {
+      const more = document.createElement("div");
+      more.className = "more-label";
+      more.textContent = "+" + (dayEvs.length - 3) + " more";
+      cell.appendChild(more);
     }
 
-    // ─── APP ─────────────────────────────────────────────────────────────────
-    function App() {
-      const [events, setEvents] = useState(MOCK_EVENTS);
-      const [loading, setLoading] = useState(true);
-      const [view, setView] = useState("calendar");
-      const [currentDate, setCurrentDate] = useState(new Date(2026, 5, 1));
-      const [selectedEvent, setSelectedEvent] = useState(null);
-      const [filters, setFilters] = useState({ category: "All", format: "All", country: "All", search: "" });
-      const [usingMock, setUsingMock] = useState(false);
+    grid.appendChild(cell);
+  }
+}
 
-      useEffect(() => {
-        (async () => {
-          setLoading(true);
-          const data = await fetchEvents();
-          if (data) { setEvents(data); setUsingMock(false); } else { setUsingMock(true); }
-          setLoading(false);
-        })();
-      }, []);
+// ─── LIST ────────────────────────────────────────────────────────────────────
+function renderList() {
+  const sorted = [...filteredEvents].sort((a,b) => parseDate(a.date) - parseDate(b.date));
+  document.getElementById("list-count").textContent = "(" + sorted.length + ")";
+  const body = document.getElementById("list-body");
+  body.innerHTML = "";
 
-      const categories = useMemo(() => ["All", ...Array.from(new Set(events.map(e => e.category))).sort()], [events]);
-      const countries = useMemo(() => ["All", "Virtual", ...Array.from(new Set(events.map(e => e.country).filter(c => c !== "Virtual"))).sort()], [events]);
-      const formats = ["All", "In-Person", "Virtual", "Hybrid"];
+  if (sorted.length === 0) {
+    body.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div style="font-weight:500">No events match your filters.</div></div>';
+    return;
+  }
 
-      const filteredEvents = useMemo(() => events.filter(ev => {
-        if (filters.category !== "All" && ev.category !== filters.category) return false;
-        if (filters.format !== "All" && ev.format !== filters.format) return false;
-        if (filters.country !== "All" && ev.country !== filters.country) return false;
-        if (filters.search && !ev.title.toLowerCase().includes(filters.search.toLowerCase()) && !ev.city.toLowerCase().includes(filters.search.toLowerCase())) return false;
-        return true;
-      }), [events, filters]);
+  sorted.forEach(ev => {
+    const col = CAT_COLORS[ev.category] || DEFAULT_COL;
+    const start = parseDate(ev.date), end = parseDate(ev.endDate || ev.date);
+    const isMulti = ev.endDate && ev.date !== ev.endDate;
 
-      const year = currentDate.getFullYear(), month = currentDate.getMonth();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const calendarCells = [];
-      for (let i = 0; i < firstDay; i++) calendarCells.push(null);
-      for (let d = 1; d <= daysInMonth; d++) calendarCells.push(new Date(year, month, d));
+    const card = document.createElement("div");
+    card.className = "list-card";
+    card.onclick = () => openModal(ev);
+    card.innerHTML =
+      '<div class="date-block">' +
+        '<div class="day">' + start.getDate() + '</div>' +
+        '<div class="mon">' + MONTHS[start.getMonth()].slice(0,3) + '</div>' +
+        (isMulti ? '<div class="range">→ ' + end.getDate() + ' ' + MONTHS[end.getMonth()].slice(0,3) + '</div>' : '') +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-top">' +
+          '<div class="card-title">' + esc(ev.title) + '</div>' +
+          '<div class="badges">' +
+            '<span class="badge" style="background:' + col.bg + ';color:' + col.text + '">' + esc(ev.category) + '</span>' +
+            '<span class="badge" style="background:#f1f5f9;color:#64748b">' + (FORMAT_ICONS[ev.format]||"") + ' ' + esc(ev.format) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-loc">📍 ' + (ev.city !== "Online" ? esc(ev.city) + ', ' : '') + esc(ev.country) + '</div>' +
+        '<div class="card-desc">' + esc(ev.description) + '</div>' +
+      '</div>';
+    body.appendChild(card);
+  });
+}
 
-      const today = new Date();
-      const listEvents = useMemo(() => [...filteredEvents].sort((a,b) => parseDate(a.date)-parseDate(b.date)), [filteredEvents]);
-      const colFor = cat => CATEGORY_COLORS[cat] || DEFAULT_COLOR;
-      const selCatCol = filters.category !== "All" ? colFor(filters.category) : null;
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openModal(ev) {
+  const col = CAT_COLORS[ev.category] || DEFAULT_COL;
+  const start = parseDate(ev.date), end = parseDate(ev.endDate || ev.date);
+  const isMulti = ev.endDate && ev.date !== ev.endDate;
+  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
 
-      return (
-        <div style={{ minHeight:"100vh", background:"#f8fafc", color:"#1e293b", fontFamily:"'Inter','Segoe UI',system-ui,sans-serif" }}>
-          <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
-            * { box-sizing:border-box; }
-            ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#f1f5f9} ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
-            .cal-cell{background:#fff;border:1px solid #e2e8f0;border-radius:8px;min-height:90px;padding:6px;transition:border-color .15s}
-            .cal-cell:hover{border-color:#94a3b8}
-            .cal-cell.today{border-color:#2563eb!important;box-shadow:0 0 0 2px #bfdbfe55}
-            .ev-pill{font-size:11px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-weight:500;transition:opacity .1s;border-left:3px solid}
-            .ev-pill:hover{opacity:.75}
-            .list-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:10px;cursor:pointer;transition:all .18s;display:flex;gap:16px;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-            .list-card:hover{border-color:#2563eb;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
-            .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
-            .modal{background:#fff;border:1px solid #e2e8f0;border-radius:16px;max-width:520px;width:100%;padding:32px;position:relative;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
-            .nav-btn{background:#fff;border:1px solid #e2e8f0;color:#475569;padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-            .nav-btn:hover{border-color:#2563eb;color:#1e293b;background:#eff6ff}
-            .view-toggle{display:flex;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;padding:3px}
-            .view-btn{padding:7px 18px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:transparent;color:#94a3b8}
-            .view-btn.active{background:#2563eb;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-            .filter-select{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 28px 8px 12px;color:#374151;font-size:13px;cursor:pointer;outline:none;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border .15s;appearance:none}
-            .filter-select:focus{border-color:#2563eb}
-            .search-input{background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 14px 8px 36px;color:#1e293b;font-size:13px;outline:none;width:220px;transition:border .15s;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-            .search-input:focus{border-color:#2563eb}
-            .search-input::placeholder{color:#94a3b8}
-            .badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;letter-spacing:.03em}
-            .select-wrap{position:relative;display:inline-block}
-            .select-wrap::after{content:"▾";position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#94a3b8;font-size:12px}
-            .filter-bar{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;margin-bottom:22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-            .search-wrap{position:relative;display:inline-block}
-            .search-wrap::before{content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:12px;pointer-events:none}
-            .cal-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid #e2e8f0;background:#fff;color:#374151;transition:all .15s;text-decoration:none;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-            .cal-btn:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff}
-          `}</style>
+  document.getElementById("modal-badges").innerHTML =
+    '<span class="badge" style="background:' + col.bg + ';color:' + col.text + '">' + esc(ev.category) + '</span>' +
+    '<span class="badge" style="background:#f1f5f9;color:#64748b">' + (FORMAT_ICONS[ev.format]||"") + ' ' + esc(ev.format) + '</span>';
 
-          {/* HEADER */}
-          <header style={{ background:"#fff", borderBottom:"1px solid #e2e8f0", padding:"0 28px", boxShadow:"0 1px 3px rgba(0,0,0,.04)" }}>
-            <div style={{ maxWidth:1200, margin:"0 auto", display:"flex", alignItems:"center", justifyContent:"space-between", height:64 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                <div style={{ width:34, height:34, background:"linear-gradient(135deg,#2563eb,#60a5fa)", borderRadius:9, display:"flex", alignItems:"center", justifyContent:"center", fontSize:17 }}>🌍</div>
-                <div>
-                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:18, fontWeight:700, color:"#1e293b", lineHeight:1 }}>Africa Events</div>
-                  <div style={{ fontSize:10, color:"#94a3b8", letterSpacing:".07em", textTransform:"uppercase", marginTop:1 }}>Pan-African Calendar</div>
-                </div>
-              </div>
-              <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                {usingMock && (
-                  <div style={{ fontSize:11, color:"#94a3b8", background:"#f8fafc", padding:"4px 10px", borderRadius:6, border:"1px solid #e2e8f0" }}>
-                    Demo data — connect Baserow to go live
-                  </div>
-                )}
-                <div className="view-toggle">
-                  <button className={`view-btn${view==="calendar"?" active":""}`} onClick={()=>setView("calendar")}>Calendar</button>
-                  <button className={`view-btn${view==="list"?" active":""}`} onClick={()=>setView("list")}>List</button>
-                </div>
-              </div>
-            </div>
-          </header>
+  document.getElementById("modal-title").textContent = ev.title;
 
-          <div style={{ maxWidth:1200, margin:"0 auto", padding:"24px 28px" }}>
+  document.getElementById("modal-meta").innerHTML =
+    '<div><div class="meta-label">Date</div><div class="meta-val">' +
+      MONTHS[start.getMonth()] + ' ' + start.getDate() + ', ' + start.getFullYear() +
+      (isMulti ? ' <span>→ ' + MONTHS[end.getMonth()] + ' ' + end.getDate() + ', ' + end.getFullYear() + '</span>' : '') +
+    '</div></div>' +
+    '<div><div class="meta-label">Location</div><div class="meta-val">' + esc(loc) + '</div></div>';
 
-            {/* FILTER BAR */}
-            <div className="filter-bar">
-              <div className="search-wrap">
-                <input className="search-input" type="text" placeholder="Search events or cities…" value={filters.search} onChange={e=>setFilters(f=>({...f,search:e.target.value}))} />
-              </div>
-              <div style={{ width:1, height:28, background:"#e2e8f0" }} />
-              <div className="select-wrap">
-                <select className="filter-select" value={filters.category} onChange={e=>setFilters(f=>({...f,category:e.target.value}))}
-                  style={selCatCol ? { borderColor:selCatCol.dot, color:selCatCol.text, background:selCatCol.bg } : {}}>
-                  {categories.map(c => <option key={c} value={c}>{c==="All"?"All Categories":c}</option>)}
-                </select>
-              </div>
-              <div className="select-wrap">
-                <select className="filter-select" value={filters.format} onChange={e=>setFilters(f=>({...f,format:e.target.value}))}>
-                  {formats.map(f => <option key={f} value={f}>{f==="All"?"All Formats":`${FORMAT_ICONS[f]} ${f}`}</option>)}
-                </select>
-              </div>
-              <div className="select-wrap">
-                <select className="filter-select" value={filters.country} onChange={e=>setFilters(f=>({...f,country:e.target.value}))}>
-                  {countries.map(c => <option key={c} value={c}>{c==="All"?"All Countries":c}</option>)}
-                </select>
-              </div>
-              {(filters.category!=="All"||filters.format!=="All"||filters.country!=="All"||filters.search) && (
-                <button onClick={()=>setFilters({category:"All",format:"All",country:"All",search:""})}
-                  style={{ marginLeft:"auto",background:"none",border:"none",color:"#94a3b8",fontSize:12,cursor:"pointer",fontWeight:500,padding:"4px 8px",borderRadius:6 }}>
-                  ✕ Clear filters
-                </button>
-              )}
-            </div>
+  document.getElementById("modal-desc").textContent = ev.description;
 
-            {loading ? (
-              <div style={{ textAlign:"center", padding:80, color:"#94a3b8" }}>
-                <div style={{ fontSize:32, marginBottom:12 }}>⏳</div>
-                <div>Loading events…</div>
-              </div>
-            ) : view === "calendar" ? (
-              <>
-                {/* CAL NAV */}
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:16 }}>
-                  <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:24, margin:0, color:"#1e293b" }}>
-                    {MONTHS[month]} <span style={{ color:"#2563eb" }}>{year}</span>
-                  </h2>
-                  <div style={{ display:"flex", gap:8 }}>
-                    <button className="nav-btn" onClick={()=>setCurrentDate(new Date(year,month-1,1))}>← Prev</button>
-                    <button className="nav-btn" onClick={()=>setCurrentDate(new Date())}>Today</button>
-                    <button className="nav-btn" onClick={()=>setCurrentDate(new Date(year,month+1,1))}>Next →</button>
-                  </div>
-                </div>
+  // Calendar buttons
+  document.getElementById("cal-btns").innerHTML =
+    '<a href="' + googleCalURL(ev) + '" target="_blank" class="cal-btn">📅 Google Calendar</a>' +
+    '<button class="cal-btn" onclick="downloadICS(allEventsById[' + ev.id + '])">🍎 Apple Calendar</button>' +
+    '<a href="' + outlookURL(ev) + '" target="_blank" class="cal-btn">📧 Outlook</a>' +
+    '<button class="cal-btn" onclick="downloadICS(allEventsById[' + ev.id + '])">📥 Download .ics</button>';
 
-                {/* DAY HEADERS */}
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4, marginBottom:4 }}>
-                  {DAYS.map(d => (
-                    <div key={d} style={{ textAlign:"center", fontSize:11, fontWeight:700, color:"#94a3b8", padding:"6px 0", letterSpacing:".06em", textTransform:"uppercase" }}>{d}</div>
-                  ))}
-                </div>
+  // Footer link
+  const hasLink = ev.link && ev.link !== "#";
+  document.getElementById("modal-footer").innerHTML = hasLink
+    ? '<a href="' + esc(ev.link) + '" target="_blank" rel="noreferrer" class="visit-btn">Visit Event Site →</a>' +
+      '<span class="event-url">' + esc(ev.link) + '</span>'
+    : '<span class="no-link">No event link available</span>';
 
-                {/* CALENDAR GRID */}
-                <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:4 }}>
-                  {calendarCells.map((day, i) => {
-                    if (!day) return <div key={`e-${i}`} />;
-                    const dayEvs = filteredEvents.filter(ev => eventSpansDay(ev, day));
-                    const isToday = sameDay(day, today);
-                    return (
-                      <div key={i} className={`cal-cell${isToday?" today":""}`}>
-                        <div style={{ fontSize:12, fontWeight:isToday?700:500, color:isToday?"#2563eb":"#94a3b8", marginBottom:4, textAlign:"right" }}>
-                          {day.getDate()}
-                        </div>
-                        {dayEvs.slice(0,3).map(ev => {
-                          const col = colFor(ev.category);
-                          return (
-                            <div key={ev.id} className="ev-pill"
-                              style={{ background:col.bg, color:col.text, borderLeftColor:col.dot }}
-                              onClick={()=>setSelectedEvent(ev)} title={ev.title}>
-                              {ev.title}
-                            </div>
-                          );
-                        })}
-                        {dayEvs.length > 3 && <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>+{dayEvs.length-3} more</div>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              <>
-                {/* LIST VIEW */}
-                <div style={{ display:"flex", alignItems:"center", marginBottom:18 }}>
-                  <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:24, margin:0, color:"#1e293b" }}>
-                    All Events <span style={{ color:"#2563eb", fontSize:16, fontFamily:"Inter,sans-serif", fontWeight:600 }}>({listEvents.length})</span>
-                  </h2>
-                </div>
-                {listEvents.length === 0 && (
-                  <div style={{ textAlign:"center", padding:60, color:"#94a3b8", background:"#fff", borderRadius:12, border:"1px solid #e2e8f0" }}>
-                    <div style={{ fontSize:32, marginBottom:10 }}>🔍</div>
-                    <div style={{ fontWeight:500 }}>No events match your filters.</div>
-                  </div>
-                )}
-                {listEvents.map(ev => {
-                  const col = colFor(ev.category);
-                  const start = parseDate(ev.date), end = parseDate(ev.endDate||ev.date);
-                  const isMultiDay = ev.endDate && ev.date !== ev.endDate;
-                  return (
-                    <div key={ev.id} className="list-card" onClick={()=>setSelectedEvent(ev)}>
-                      <div style={{ minWidth:64, textAlign:"center", background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:10, padding:"10px 8px", flexShrink:0 }}>
-                        <div style={{ fontSize:22, fontWeight:700, color:"#1e293b", lineHeight:1 }}>{start.getDate()}</div>
-                        <div style={{ fontSize:11, color:"#2563eb", fontWeight:700, textTransform:"uppercase", marginTop:2 }}>{MONTHS[start.getMonth()].slice(0,3)}</div>
-                        {isMultiDay && <div style={{ fontSize:9, color:"#94a3b8", marginTop:4 }}>→ {end.getDate()} {MONTHS[end.getMonth()].slice(0,3)}</div>}
-                      </div>
-                      <div style={{ flex:1 }}>
-                        <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, marginBottom:5 }}>
-                          <div style={{ fontWeight:600, fontSize:15, color:"#1e293b", lineHeight:1.3 }}>{ev.title}</div>
-                          <div style={{ display:"flex", gap:6, flexShrink:0 }}>
-                            <span className="badge" style={{ background:col.bg, color:col.text }}>{ev.category}</span>
-                            <span className="badge" style={{ background:"#f1f5f9", color:"#64748b" }}>{FORMAT_ICONS[ev.format]} {ev.format}</span>
-                          </div>
-                        </div>
-                        <div style={{ fontSize:12, color:"#64748b", marginBottom:6 }}>📍 {ev.city !== "Online" ? `${ev.city}, ` : ""}{ev.country}</div>
-                        <div style={{ fontSize:13, color:"#64748b", lineHeight:1.6 }}>{ev.description}</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </div>
+  document.getElementById("modal-overlay").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
 
-          {/* MODAL */}
-          {selectedEvent && (
-            <div className="modal-overlay" onClick={()=>setSelectedEvent(null)}>
-              <div className="modal" onClick={e=>e.stopPropagation()}>
-                <button onClick={()=>setSelectedEvent(null)}
-                  style={{ position:"absolute",top:16,right:16,background:"#f1f5f9",border:"1px solid #e2e8f0",color:"#64748b",width:32,height:32,borderRadius:8,cursor:"pointer",fontSize:14,display:"flex",alignItems:"center",justifyContent:"center" }}>✕</button>
-                {(() => {
-                  const ev = selectedEvent;
-                  const col = colFor(ev.category);
-                  const start = parseDate(ev.date), end = parseDate(ev.endDate||ev.date);
-                  const isMultiDay = ev.endDate && ev.date !== ev.endDate;
-                  return (
-                    <>
-                      <div style={{ display:"flex",gap:8,marginBottom:14,flexWrap:"wrap" }}>
-                        <span className="badge" style={{ background:col.bg,color:col.text }}>{ev.category}</span>
-                        <span className="badge" style={{ background:"#f1f5f9",color:"#64748b" }}>{FORMAT_ICONS[ev.format]} {ev.format}</span>
-                      </div>
-                      <h2 style={{ fontFamily:"'Playfair Display',serif",fontSize:22,margin:"0 0 14px",color:"#1e293b",lineHeight:1.3 }}>{ev.title}</h2>
-                      <div style={{ display:"flex",gap:28,marginBottom:16,flexWrap:"wrap" }}>
-                        <div>
-                          <div style={{ fontSize:10,color:"#94a3b8",fontWeight:700,textTransform:"uppercase",letterSpacing:".07em",marginBottom:3 }}>Date</div>
-                          <div style={{ fontSize:14,color:"#1e293b",fontWeight:500 }}>
-                            {MONTHS[start.getMonth()]} {start.getDate()}, {start.getFullYear()}
-                            {isMultiDay && <span style={{color:"#94a3b8"}}> → {MONTHS[end.getMonth()]} {end.getDate()}, {end.getFullYear()}</span>}
-                          </div>
-                        </div>
-                        <div>
-                          <div style={{ fontSize:10,color:"#94a3b8",fontWeight:700,textTransform:"uppercase",letterSpacing:".07em",marginBottom:3 }}>Location</div>
-                          <div style={{ fontSize:14,color:"#1e293b",fontWeight:500 }}>{ev.city !== "Online" ? `${ev.city}, ` : ""}{ev.country}</div>
-                        </div>
-                      </div>
-                      <div style={{ borderTop:"1px solid #f1f5f9",paddingTop:16,marginBottom:16 }}>
-                        <p style={{ fontSize:14,color:"#475569",lineHeight:1.7,margin:0 }}>{ev.description}</p>
-                      </div>
+function closeModal(e) {
+  if (e.target === document.getElementById("modal-overlay")) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById("modal-overlay").classList.add("hidden");
+  document.body.style.overflow = "";
+}
 
-                      {/* ADD TO CALENDAR */}
-                      <div style={{ background:"#f8fafc",border:"1px solid #e2e8f0",borderRadius:10,padding:"14px 16px",marginBottom:16 }}>
-                        <div style={{ fontSize:11,fontWeight:700,color:"#94a3b8",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10 }}>Add to Calendar</div>
-                        <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
-                          <a href={googleCalendarURL(ev)} target="_blank" rel="noreferrer" className="cal-btn">📅 Google Calendar</a>
-                          <button className="cal-btn" onClick={()=>downloadICS(ev)}>🍎 Apple Calendar</button>
-                          <a href={outlookURL(ev)} target="_blank" rel="noreferrer" className="cal-btn">📧 Outlook</a>
-                          <button className="cal-btn" onClick={()=>downloadICS(ev)}>📥 Download .ics</button>
-                        </div>
-                      </div>
+// Lookup by id for inline onclick handlers
+const allEventsById = {};
+MOCK_EVENTS.forEach(e => allEventsById[e.id] = e);
 
-                      <div style={{ borderTop:"1px solid #f1f5f9",paddingTop:16,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap" }}>
-                        {ev.link && ev.link !== "#" ? (
-                          <a href={ev.link} target="_blank" rel="noreferrer"
-                            style={{ display:"inline-flex",alignItems:"center",gap:6,background:"#2563eb",color:"#fff",padding:"10px 22px",borderRadius:8,fontWeight:700,fontSize:14,textDecoration:"none" }}>
-                            Visit Event Site →
-                          </a>
-                        ) : (
-                          <span style={{ fontSize:13,color:"#94a3b8",fontStyle:"italic" }}>No event link available</span>
-                        )}
-                        {ev.link && ev.link !== "#" && (
-                          <span style={{ fontSize:12,color:"#94a3b8",wordBreak:"break-all" }}>{ev.link}</span>
-                        )}
-                      </div>
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
+// ─── CALENDAR EXPORT ─────────────────────────────────────────────────────────
+function fmtICS(d) { return d.replace(/-/g,""); }
 
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<App />);
-  </script>
+function buildICS(ev) {
+  const endObj = new Date(ev.endDate + "T00:00:00");
+  endObj.setDate(endObj.getDate() + 1);
+  const end = endObj.toISOString().slice(0,10).replace(/-/g,"");
+  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
+  return [
+    "BEGIN:VCALENDAR","VERSION:2.0",
+    "PRODID:-//Africa Events//Labari Media//EN",
+    "CALSCALE:GREGORIAN","METHOD:PUBLISH","BEGIN:VEVENT",
+    "UID:africa-events-" + ev.id + "@labarijournal.com",
+    "SUMMARY:" + ev.title,
+    "DTSTART;VALUE=DATE:" + fmtICS(ev.date),
+    "DTEND;VALUE=DATE:" + end,
+    "LOCATION:" + loc,
+    "DESCRIPTION:" + (ev.description||"").replace(/\n/g,"\\n"),
+    "URL:" + (ev.link && ev.link !== "#" ? ev.link : ""),
+    "END:VEVENT","END:VCALENDAR"
+  ].join("\r\n");
+}
+
+function downloadICS(ev) {
+  const blob = new Blob([buildICS(ev)], { type:"text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = ev.title.replace(/[^a-z0-9]/gi,"-").toLowerCase() + ".ics";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function googleCalURL(ev) {
+  const endObj = new Date(ev.endDate + "T00:00:00");
+  endObj.setDate(endObj.getDate() + 1);
+  const end = endObj.toISOString().slice(0,10).replace(/-/g,"");
+  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+    "&text=" + encodeURIComponent(ev.title) +
+    "&dates=" + fmtICS(ev.date) + "/" + end +
+    "&details=" + encodeURIComponent(ev.description||"") +
+    "&location=" + encodeURIComponent(loc);
+}
+
+function outlookURL(ev) {
+  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
+  return "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
+    "&subject=" + encodeURIComponent(ev.title) +
+    "&startdt=" + ev.date +
+    "&enddt=" + (ev.endDate||ev.date) +
+    "&body=" + encodeURIComponent(ev.description||"") +
+    "&location=" + encodeURIComponent(loc);
+}
+
+// ─── ESCAPE HTML ─────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ─── START ───────────────────────────────────────────────────────────────────
+init();
+</script>
 </body>
 </html>
