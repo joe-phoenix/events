@@ -13,6 +13,26 @@
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
 
+
+    /* TOP BAR */
+    .top-bar { background: #0f172a; padding: 0 28px; height: 42px; display: flex; align-items: center; justify-content: space-between; }
+    .top-bar-brand { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; color: #f1f5f9; letter-spacing: -.1px; display: flex; align-items: center; gap: 7px; text-decoration: none; }
+    .top-bar-brand span { color: #60a5fa; }
+    .top-bar-link { font-size: 12px; font-weight: 600; color: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color .15s; letter-spacing: .01em; }
+    .top-bar-link:hover { color: #60a5fa; }
+    .top-bar-link::after { content: "↗"; font-size: 11px; }
+
+    /* FOOTER */
+    .site-footer { background: #0f172a; border-top: 1px solid #1e293b; padding: 20px 28px; margin-top: 48px; }
+    .site-footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .footer-copy { font-size: 12px; color: #475569; font-weight: 500; }
+    .footer-copy a { color: #60a5fa; text-decoration: none; }
+    .footer-copy a:hover { text-decoration: underline; }
+    @media (max-width: 640px) {
+      .top-bar { padding: 0 14px; }
+      .site-footer { padding: 16px 14px; margin-top: 32px; }
+      .site-footer-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
+    }
     /* HERO */
     .hero { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1d4ed8 100%); padding: 52px 28px 48px; position: relative; overflow: hidden; }
     .hero::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; }
@@ -208,6 +228,12 @@
   </style>
 </head>
 <body>
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a href="https://datadesk.labarijournal.com" class="top-bar-brand">📊 <span>Labari</span> Data Desk</a>
+    <a href="https://datadesk.labarijournal.com" class="top-bar-link" target="_blank" rel="noreferrer">Back to Labari Data Desk</a>
+  </div>
 
   <!-- HERO -->
   <section class="hero" id="hero-section">
@@ -599,6 +625,11 @@ function renderCalendar() {
       const more = document.createElement("div");
       more.className = "more-label";
       more.textContent = "+" + (dayEvs.length - 3) + " more";
+      more.style.cursor = "pointer";
+      more.style.color = "#2563eb";
+      more.style.fontWeight = "600";
+      const capDay = new Date(day);
+      more.onclick = (e) => { e.stopPropagation(); openDayPopover(capDay, dayEvs, more); };
       cell.appendChild(more);
     }
 
@@ -775,6 +806,76 @@ function renderMobAgenda() {
 
 const DAYS_FULL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
+// ─── DAY POPOVER ─────────────────────────────────────────────────────────────
+let activePopover = null;
+let activeBackdrop = null;
+
+function closeDayPopover() {
+  if (activePopover) { activePopover.remove(); activePopover = null; }
+  if (activeBackdrop) { activeBackdrop.remove(); activeBackdrop = null; }
+}
+
+function openDayPopover(day, dayEvs, anchor) {
+  closeDayPopover();
+
+  const DAYS_FULL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const dateStr = DAYS_FULL[day.getDay()] + ", " + MONTHS[day.getMonth()] + " " + day.getDate();
+
+  // Backdrop to close on outside click
+  const backdrop = document.createElement("div");
+  backdrop.className = "popover-backdrop";
+  backdrop.onclick = closeDayPopover;
+  document.body.appendChild(backdrop);
+  activeBackdrop = backdrop;
+
+  // Popover
+  const pop = document.createElement("div");
+  pop.className = "day-popover";
+
+  // Header
+  const hdr = document.createElement("div"); hdr.className = "popover-header";
+  const dateEl = document.createElement("div"); dateEl.className = "popover-date"; dateEl.textContent = dateStr; hdr.appendChild(dateEl);
+  const closeBtn = document.createElement("button"); closeBtn.className = "popover-close"; closeBtn.textContent = "✕";
+  closeBtn.onclick = closeDayPopover; hdr.appendChild(closeBtn);
+  pop.appendChild(hdr);
+
+  // Event list
+  const list = document.createElement("div"); list.className = "popover-list";
+  dayEvs.forEach(ev => {
+    const col = CAT_COLORS[ev.category] || DEFAULT_COL;
+    const item = document.createElement("div"); item.className = "popover-item";
+    item.onclick = () => { closeDayPopover(); openModal(ev); };
+
+    const dot = document.createElement("div"); dot.className = "popover-dot";
+    dot.style.backgroundColor = col.dot; item.appendChild(dot);
+
+    const body = document.createElement("div"); body.className = "popover-body";
+    const title = document.createElement("div"); title.className = "popover-title"; title.textContent = ev.title; body.appendChild(title);
+    const meta = document.createElement("div"); meta.className = "popover-meta";
+    meta.textContent = (ev.city && ev.city !== "Online" ? ev.city + ", " : "") + (ev.country || "") + (ev.format ? " · " + ev.format : "");
+    body.appendChild(meta);
+    item.appendChild(body);
+    list.appendChild(item);
+  });
+  pop.appendChild(list);
+  document.body.appendChild(pop);
+  activePopover = pop;
+
+  // Position popover near the anchor element
+  const rect = anchor.getBoundingClientRect();
+  const popW = 280, popH = Math.min(dayEvs.length * 52 + 52, 372);
+  let left = rect.left + window.scrollX;
+  let top = rect.bottom + window.scrollY + 6;
+
+  // Flip left if overflows right edge
+  if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+  // Flip up if overflows bottom
+  if (top + popH > window.scrollY + window.innerHeight - 12) top = rect.top + window.scrollY - popH - 6;
+
+  pop.style.left = left + "px";
+  pop.style.top = top + "px";
+}
+
 // ─── LIST ────────────────────────────────────────────────────────────────────
 function renderList() {
   // Filter out events with no date before sorting
@@ -950,5 +1051,13 @@ function esc(str) {
 // ─── START ───────────────────────────────────────────────────────────────────
 init();
 </script>
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="footer-copy">© 2026 <a href="https://datadesk.labarijournal.com" target="_blank" rel="noreferrer">Labari Media</a>. All rights reserved.</div>
+      <div class="footer-copy"><a href="https://baserow.io/form/SZj6HavQ53MkG9wd63E-lRuqy-D6kj7fEbiHk_Vr3qM" target="_blank" rel="noreferrer">Submit an Event →</a></div>
+    </div>
+  </footer>
+
 </body>
 </html>
