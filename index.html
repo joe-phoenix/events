@@ -267,19 +267,26 @@ async function init() {
         page++;
       }
       if (all.length) {
+        // Debug: log first record to console so you can verify field names
+        console.log("[Africa Events] First Baserow record:", JSON.stringify(all[0]));
         // Baserow single-select fields return {value, id, color} objects
-        const val = f => f && typeof f === "object" ? (f.value || "") : (f || "");
+        // Country, City, Category, Format are all single-select
+        const val = f => {
+          if (!f) return "";
+          if (typeof f === "object") return f.value || "";
+          return String(f);
+        };
         data = all.map(r => ({
           id: r.id,
-          title: r["Event Name"] || "",
+          title: r["Event Name"] || r["Name"] || "",
           date: r["Start Date"] || "",
           endDate: r["End Date"] || r["Start Date"] || "",
-          country: r["Country"] || "",
-          city: r["City"] || "",
+          country: val(r["Country"]),
+          city: val(r["City"]),
           category: val(r["Category"]) || "Other",
           format: val(r["Format"]) || "In-Person",
-          description: r["Description"] || "",
-          link: r["Link"] || "#",
+          description: r["Description"] || r["Notes"] || "",
+          link: r["Link"] || r["URL"] || r["Website"] || "#",
         }));
       }
     } catch(e) { console.error(e); }
@@ -425,13 +432,15 @@ function renderCalendar() {
 
 // ─── LIST ────────────────────────────────────────────────────────────────────
 function renderList() {
-  const sorted = [...filteredEvents].sort((a,b) => parseDate(a.date) - parseDate(b.date));
+  // Filter out events with no date before sorting
+  const valid = filteredEvents.filter(ev => ev.date && ev.date.length >= 8);
+  const sorted = valid.sort((a,b) => parseDate(a.date) - parseDate(b.date));
   document.getElementById("list-count").textContent = "(" + sorted.length + ")";
   const body = document.getElementById("list-body");
   body.innerHTML = "";
 
   if (sorted.length === 0) {
-    body.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div style="font-weight:500">No events match your filters.</div></div>';
+    body.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div style="font-weight:500">No events found.</div></div>';
     return;
   }
 
@@ -446,9 +455,9 @@ function renderList() {
 
     // Date block
     const db = document.createElement("div"); db.className = "date-block";
-    const dayEl = document.createElement("div"); dayEl.className = "day"; dayEl.textContent = start.getDate(); db.appendChild(dayEl);
-    const monEl = document.createElement("div"); monEl.className = "mon"; monEl.textContent = MONTHS[start.getMonth()].slice(0,3); db.appendChild(monEl);
-    if (isMulti) { const rng = document.createElement("div"); rng.className = "range"; rng.textContent = "\u2192 " + end.getDate() + " " + MONTHS[end.getMonth()].slice(0,3); db.appendChild(rng); }
+    const dayEl = document.createElement("div"); dayEl.className = "day"; dayEl.textContent = isNaN(start) ? "?" : start.getDate(); db.appendChild(dayEl);
+    const monEl = document.createElement("div"); monEl.className = "mon"; monEl.textContent = isNaN(start) ? "???" : MONTHS[start.getMonth()].slice(0,3); db.appendChild(monEl);
+    if (isMulti && !isNaN(end)) { const rng = document.createElement("div"); rng.className = "range"; rng.textContent = "\u2192 " + end.getDate() + " " + MONTHS[end.getMonth()].slice(0,3); db.appendChild(rng); }
     card.appendChild(db);
 
     // Card body
@@ -466,9 +475,10 @@ function renderList() {
     bdgs.appendChild(fmtBadge);
     ct.appendChild(bdgs); cb.appendChild(ct);
     const locEl = document.createElement("div"); locEl.className = "card-loc";
-    locEl.textContent = "\uD83D\uDCCD " + (ev.city !== "Online" ? ev.city + ", " : "") + ev.country;
+    const locStr = [ev.city, ev.country].filter(x => x && x !== "Online").join(", ") || (ev.country || ev.city || "");
+    locEl.textContent = "\uD83D\uDCCD " + locStr;
     cb.appendChild(locEl);
-    const descEl = document.createElement("div"); descEl.className = "card-desc"; descEl.textContent = ev.description;
+    const descEl = document.createElement("div"); descEl.className = "card-desc"; descEl.textContent = ev.description || "";
     cb.appendChild(descEl);
     card.appendChild(cb);
     body.appendChild(card);
@@ -480,7 +490,7 @@ function openModal(ev) {
   const col = CAT_COLORS[ev.category] || DEFAULT_COL;
   const start = parseDate(ev.date), end = parseDate(ev.endDate || ev.date);
   const isMulti = ev.endDate && ev.date !== ev.endDate;
-  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
+  const loc = [ev.city, ev.country].filter(x => x && x !== "Online").join(", ") || ev.country || ev.city || "Online";
 
   const mbEl = document.getElementById("modal-badges"); mbEl.innerHTML = "";
   const mb1 = document.createElement("span"); mb1.className = "badge"; mb1.textContent = ev.category;
@@ -536,7 +546,7 @@ function buildICS(ev) {
   const endObj = new Date(ev.endDate + "T00:00:00");
   endObj.setDate(endObj.getDate() + 1);
   const end = endObj.toISOString().slice(0,10).replace(/-/g,"");
-  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
+  const loc = [ev.city, ev.country].filter(x => x && x !== "Online").join(", ") || ev.country || ev.city || "Online";
   return [
     "BEGIN:VCALENDAR","VERSION:2.0",
     "PRODID:-//Africa Events//Labari Media//EN",
@@ -566,7 +576,7 @@ function googleCalURL(ev) {
   const endObj = new Date(ev.endDate + "T00:00:00");
   endObj.setDate(endObj.getDate() + 1);
   const end = endObj.toISOString().slice(0,10).replace(/-/g,"");
-  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
+  const loc = [ev.city, ev.country].filter(x => x && x !== "Online").join(", ") || ev.country || ev.city || "Online";
   return "https://calendar.google.com/calendar/render?action=TEMPLATE" +
     "&text=" + encodeURIComponent(ev.title) +
     "&dates=" + fmtICS(ev.date) + "/" + end +
@@ -575,7 +585,7 @@ function googleCalURL(ev) {
 }
 
 function outlookURL(ev) {
-  const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
+  const loc = [ev.city, ev.country].filter(x => x && x !== "Online").join(", ") || ev.country || ev.city || "Online";
   return "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
     "&subject=" + encodeURIComponent(ev.title) +
     "&startdt=" + ev.date +
