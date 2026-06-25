@@ -6,18 +6,45 @@
   <title>Africa Events — Pan-African Calendar</title>
   <meta name="description" content="A pan-African events calendar covering technology, business, culture, media, policy and more across the continent." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #f8fafc; color: #1e293b; font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    body { background: #f8fafc; color: #1e293b; font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f5f9; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #1d4ed8 100%); padding: 52px 28px 48px; position: relative; overflow: hidden; }
+    .hero::before { content: ""; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); pointer-events: none; }
+    .hero-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+    .hero-left { flex: 1; min-width: 260px; }
+    .hero-eyebrow { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); border-radius: 99px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: #93c5fd; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 16px; }
+    .hero-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 38px; font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 12px; letter-spacing: -.5px; }
+    .hero-title span { color: #60a5fa; }
+    .hero-sub { font-size: 15px; color: #94a3b8; line-height: 1.6; max-width: 480px; margin-bottom: 28px; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .hero-btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #2563eb; color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; text-decoration: none; transition: all .15s; border: 2px solid #3b82f6; font-family: inherit; }
+    .hero-btn-primary:hover { background: #1d4ed8; border-color: #2563eb; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(37,99,235,.35); }
+    .hero-btn-primary .btn-icon { font-size: 16px; }
+    .hero-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+    .hero-stat { text-align: center; }
+    .hero-stat-num { font-size: 26px; font-weight: 800; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1; }
+    .hero-stat-lbl { font-size: 11px; color: #64748b; margin-top: 3px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
+
+    @media (max-width: 640px) {
+      .hero { padding: 36px 16px 32px; }
+      .hero-title { font-size: 26px; }
+      .hero-sub { font-size: 13px; margin-bottom: 20px; }
+      .hero-btn-primary { padding: 10px 18px; font-size: 13px; width: 100%; justify-content: center; }
+      .hero-stats { gap: 20px; }
+      .hero-stat-num { font-size: 20px; }
+    }
     /* HEADER */
     #app-header { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 28px; box-shadow: 0 1px 3px rgba(0,0,0,.04); position: sticky; top: 0; z-index: 50; }
     .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
     .logo-wrap { display: flex; align-items: center; gap: 12px; }
     .logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg,#2563eb,#60a5fa); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
-    .logo-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #1e293b; line-height: 1; }
+    .logo-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 700; color: #1e293b; line-height: 1; }
     .logo-sub { font-size: 10px; color: #94a3b8; letter-spacing: .07em; text-transform: uppercase; margin-top: 1px; }
     .view-toggle { display: flex; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 3px; }
     .view-btn { padding: 7px 18px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; background: transparent; color: #94a3b8; font-family: inherit; }
@@ -44,7 +71,7 @@
 
     /* CALENDAR */
     .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .cal-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #1e293b; }
+    .cal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; color: #1e293b; }
     .cal-title span { color: #2563eb; }
     .cal-nav { display: flex; gap: 8px; }
     .nav-btn { background: #fff; border: 1px solid #e2e8f0; color: #475569; padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .15s; box-shadow: 0 1px 2px rgba(0,0,0,.04); font-family: inherit; }
@@ -64,8 +91,8 @@
 
     /* LIST */
     .list-header { display: flex; align-items: center; margin-bottom: 18px; }
-    .list-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #1e293b; }
-    .list-count { color: #2563eb; font-size: 16px; font-family: Inter, sans-serif; font-weight: 600; margin-left: 8px; }
+    .list-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; color: #1e293b; }
+    .list-count { color: #2563eb; font-size: 16px; font-family: 'DM Sans', sans-serif; font-weight: 600; margin-left: 8px; }
     .list-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 10px; cursor: pointer; transition: all .18s; display: flex; gap: 16px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
     .list-card:hover { border-color: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
     .date-block { min-width: 64px; text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 8px; flex-shrink: 0; }
@@ -88,7 +115,7 @@
     .modal { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; max-width: 520px; width: 100%; padding: 32px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.15); }
     .modal-close { position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: 1px solid #e2e8f0; color: #64748b; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-family: inherit; }
     .modal-badges { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
-    .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin: 0 0 14px; color: #1e293b; line-height: 1.3; }
+    .modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; margin: 0 0 14px; color: #1e293b; line-height: 1.3; }
     .modal-meta { display: flex; gap: 28px; margin-bottom: 16px; flex-wrap: wrap; }
     .meta-label { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 3px; }
     .meta-val { font-size: 14px; color: #1e293b; font-weight: 500; }
@@ -113,7 +140,7 @@
 
     /* Week strip */
     .mob-cal-header { display: flex; align-items: center; justify-content: space-between; padding: 0 0 12px; }
-    .mob-cal-title { font-family: 'Playfair Display', serif; font-size: 20px; color: #1e293b; }
+    .mob-cal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; color: #1e293b; }
     .mob-cal-title span { color: #2563eb; }
     .mob-nav { display: flex; gap: 6px; }
     .mob-nav-btn { background: #fff; border: 1px solid #e2e8f0; color: #475569; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-family: inherit; font-weight: 600; }
@@ -182,16 +209,26 @@
 </head>
 <body>
 
+  <!-- HERO -->
+  <section class="hero" id="hero-section">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-eyebrow">🌍 Pan-African</div>
+        <h1 class="hero-title">Discover Events<br><span>Across Africa</span></h1>
+        <p class="hero-sub">Your go-to calendar for conferences, festivals, summits and more — spanning every corner of the continent.</p>
+        <div class="hero-actions">
+          <a href="https://baserow.io/form/SZj6HavQ53MkG9wd63E-lRuqy-D6kj7fEbiHk_Vr3qM" target="_blank" rel="noreferrer" class="hero-btn-primary">
+            <span class="btn-icon">＋</span> Submit an Event
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- HEADER -->
   <header id="app-header">
     <div class="header-inner">
-      <div class="logo-wrap">
-        <div class="logo-icon">🌍</div>
-        <div>
-          <div class="logo-title">Africa Events</div>
-          <div class="logo-sub">Pan-African Calendar</div>
-        </div>
-      </div>
       <div style="display:flex;align-items:center;gap:12px;">
         <div class="demo-badge" id="demo-badge" style="display:none;">Demo data — connect Baserow to go live</div>
         <div class="view-toggle">
@@ -408,6 +445,8 @@ async function init() {
   document.getElementById("loading-state").style.display = "none";
   mobGoToday();
   setView("calendar");
+
+
 }
 
 // ─── FILTERS ─────────────────────────────────────────────────────────────────
