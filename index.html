@@ -200,7 +200,11 @@
       <h2 class="modal-title" id="modal-title"></h2>
       <div class="modal-meta" id="modal-meta"></div>
       <hr class="modal-divider">
-      <p class="modal-desc" id="modal-desc"></p>
+      <div id="modal-desc-wrap" style="margin-bottom:16px;display:none;">
+        <div class="meta-label" style="margin-bottom:6px;">About this event</div>
+        <p class="modal-desc" id="modal-desc" style="margin:0;"></p>
+      </div>
+      <hr class="modal-divider" id="modal-desc-divider" style="display:none;">
       <div class="add-cal-box">
         <div class="add-cal-label">Add to Calendar</div>
         <div class="cal-btns" id="cal-btns"></div>
@@ -285,7 +289,7 @@ async function init() {
           city: val(r["City"]),
           category: val(r["Category"]) || "Other",
           format: val(r["Format"]) || "In-Person",
-          description: r["Description"] || r["Notes"] || "",
+          description: r["Description"] || r["Notes"] || r["About"] || r["Details"] || r["Summary"] || r["Event Description"] || "",
           link: r["Link"] || r["URL"] || r["Website"] || "#",
         }));
       }
@@ -507,7 +511,10 @@ function openModal(ev) {
     '</div></div>' +
     '<div><div class="meta-label">Location</div><div class="meta-val">' + esc(loc) + '</div></div>';
 
-  document.getElementById("modal-desc").textContent = ev.description;
+  const descText = ev.description || "";
+  document.getElementById("modal-desc").textContent = descText;
+  document.getElementById("modal-desc-wrap").style.display = descText ? "block" : "none";
+  document.getElementById("modal-desc-divider").style.display = descText ? "block" : "none";
 
   // Calendar buttons
   document.getElementById("cal-btns").innerHTML =
