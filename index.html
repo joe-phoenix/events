@@ -284,6 +284,7 @@ async function init() {
   }
 
   allEvents = data || MOCK_EVENTS;
+  allEvents.forEach(e => allEventsById[e.id] = e);
   if (!data) document.getElementById("demo-badge").style.display = "block";
 
   buildFilterOptions();
@@ -400,7 +401,9 @@ function renderCalendar() {
       const col = CAT_COLORS[ev.category] || DEFAULT_COL;
       const pill = document.createElement("div");
       pill.className = "ev-pill";
-      pill.style.cssText = "background:" + col.bg + ";color:" + col.text + ";border-left-color:" + col.dot;
+      pill.style.backgroundColor = col.bg;
+      pill.style.color = col.text;
+      pill.style.borderLeftColor = col.dot;
       pill.textContent = ev.title;
       pill.title = ev.title;
       pill.onclick = () => openModal(ev);
@@ -438,23 +441,34 @@ function renderList() {
     const card = document.createElement("div");
     card.className = "list-card";
     card.onclick = () => openModal(ev);
-    card.innerHTML =
-      '<div class="date-block">' +
-        '<div class="day">' + start.getDate() + '</div>' +
-        '<div class="mon">' + MONTHS[start.getMonth()].slice(0,3) + '</div>' +
-        (isMulti ? '<div class="range">→ ' + end.getDate() + ' ' + MONTHS[end.getMonth()].slice(0,3) + '</div>' : '') +
-      '</div>' +
-      '<div class="card-body">' +
-        '<div class="card-top">' +
-          '<div class="card-title">' + esc(ev.title) + '</div>' +
-          '<div class="badges">' +
-            '<span class="badge" style="background:' + col.bg + ';color:' + col.text + '">' + esc(ev.category) + '</span>' +
-            '<span class="badge" style="background:#f1f5f9;color:#64748b">' + (FORMAT_ICONS[ev.format]||"") + ' ' + esc(ev.format) + '</span>' +
-          '</div>' +
-        '</div>' +
-        '<div class="card-loc">📍 ' + (ev.city !== "Online" ? esc(ev.city) + ', ' : '') + esc(ev.country) + '</div>' +
-        '<div class="card-desc">' + esc(ev.description) + '</div>' +
-      '</div>';
+
+    // Date block
+    const db = document.createElement("div"); db.className = "date-block";
+    const dayEl = document.createElement("div"); dayEl.className = "day"; dayEl.textContent = start.getDate(); db.appendChild(dayEl);
+    const monEl = document.createElement("div"); monEl.className = "mon"; monEl.textContent = MONTHS[start.getMonth()].slice(0,3); db.appendChild(monEl);
+    if (isMulti) { const rng = document.createElement("div"); rng.className = "range"; rng.textContent = "\u2192 " + end.getDate() + " " + MONTHS[end.getMonth()].slice(0,3); db.appendChild(rng); }
+    card.appendChild(db);
+
+    // Card body
+    const cb = document.createElement("div"); cb.className = "card-body";
+    const ct = document.createElement("div"); ct.className = "card-top";
+    const ttl = document.createElement("div"); ttl.className = "card-title"; ttl.textContent = ev.title; ct.appendChild(ttl);
+    const bdgs = document.createElement("div"); bdgs.className = "badges";
+    const catBadge = document.createElement("span"); catBadge.className = "badge";
+    catBadge.textContent = ev.category;
+    catBadge.style.backgroundColor = col.bg; catBadge.style.color = col.text;
+    bdgs.appendChild(catBadge);
+    const fmtBadge = document.createElement("span"); fmtBadge.className = "badge";
+    fmtBadge.textContent = (FORMAT_ICONS[ev.format]||"") + " " + ev.format;
+    fmtBadge.style.backgroundColor = "#f1f5f9"; fmtBadge.style.color = "#64748b";
+    bdgs.appendChild(fmtBadge);
+    ct.appendChild(bdgs); cb.appendChild(ct);
+    const locEl = document.createElement("div"); locEl.className = "card-loc";
+    locEl.textContent = "\uD83D\uDCCD " + (ev.city !== "Online" ? ev.city + ", " : "") + ev.country;
+    cb.appendChild(locEl);
+    const descEl = document.createElement("div"); descEl.className = "card-desc"; descEl.textContent = ev.description;
+    cb.appendChild(descEl);
+    card.appendChild(cb);
     body.appendChild(card);
   });
 }
@@ -466,9 +480,11 @@ function openModal(ev) {
   const isMulti = ev.endDate && ev.date !== ev.endDate;
   const loc = ev.city !== "Online" ? ev.city + ", " + ev.country : "Online";
 
-  document.getElementById("modal-badges").innerHTML =
-    '<span class="badge" style="background:' + col.bg + ';color:' + col.text + '">' + esc(ev.category) + '</span>' +
-    '<span class="badge" style="background:#f1f5f9;color:#64748b">' + (FORMAT_ICONS[ev.format]||"") + ' ' + esc(ev.format) + '</span>';
+  const mbEl = document.getElementById("modal-badges"); mbEl.innerHTML = "";
+  const mb1 = document.createElement("span"); mb1.className = "badge"; mb1.textContent = ev.category;
+  mb1.style.backgroundColor = col.bg; mb1.style.color = col.text; mbEl.appendChild(mb1);
+  const mb2 = document.createElement("span"); mb2.className = "badge"; mb2.textContent = (FORMAT_ICONS[ev.format]||"") + " " + ev.format;
+  mb2.style.backgroundColor = "#f1f5f9"; mb2.style.color = "#64748b"; mbEl.appendChild(mb2);
 
   document.getElementById("modal-title").textContent = ev.title;
 
@@ -507,7 +523,7 @@ function closeModalDirect() {
   document.body.style.overflow = "";
 }
 
-// Lookup by id for inline onclick handlers
+// Lookup by id - populated after data loads
 const allEventsById = {};
 MOCK_EVENTS.forEach(e => allEventsById[e.id] = e);
 
