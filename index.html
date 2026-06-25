@@ -106,6 +106,42 @@
     .no-link { font-size: 13px; color: #94a3b8; font-style: italic; }
     .event-url { font-size: 12px; color: #94a3b8; word-break: break-all; }
 
+
+    /* MOBILE */
+    @media (max-width: 640px) {
+      #app-header { padding: 0 14px; }
+      .logo-sub { display: none; }
+      .logo-title { font-size: 15px; }
+      .view-btn { padding: 6px 12px; font-size: 12px; }
+      #main { padding: 14px; }
+      .filter-bar { padding: 10px 12px; gap: 8px; }
+      .search-input { width: 100%; }
+      .filter-select { font-size: 12px; }
+      /* Calendar mobile: compact cells */
+      .cal-header { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+      .cal-title { font-size: 20px; }
+      .cal-nav { width: 100%; display: flex; justify-content: space-between; }
+      .nav-btn { padding: 6px 10px; font-size: 12px; flex: 1; text-align: center; }
+      .day-hdr { font-size: 9px; padding: 4px 0; }
+      .cal-grid { gap: 2px; }
+      .cal-cell { min-height: 52px; padding: 3px; border-radius: 6px; }
+      .day-num { font-size: 10px; margin-bottom: 2px; }
+      .ev-pill { font-size: 9px; padding: 1px 3px; border-radius: 3px; border-left-width: 2px; margin-bottom: 1px; }
+      .more-label { font-size: 8px; }
+      /* List mobile */
+      .list-card { padding: 14px; gap: 10px; }
+      .date-block { min-width: 50px; padding: 7px 5px; }
+      .date-block .day { font-size: 18px; }
+      .date-block .mon { font-size: 10px; }
+      .card-title { font-size: 14px; }
+      .card-top { flex-direction: column; gap: 6px; }
+      .badges { flex-direction: row; }
+      /* Modal mobile */
+      .modal { padding: 20px; border-radius: 12px; }
+      .modal-title { font-size: 18px; }
+      .cal-btns { flex-direction: column; }
+      .cal-btn { width: 100%; justify-content: center; }
+    }
     /* LOADING */
     .loading { text-align: center; padding: 80px; color: #94a3b8; }
     .loading-icon { font-size: 32px; margin-bottom: 12px; }
@@ -184,9 +220,16 @@
       <div class="cal-grid" id="cal-grid"></div>
     </div>
     <div id="view-list" style="display:none;">
-      <div class="list-header">
-        <h2 class="list-title">All Events</h2>
-        <span class="list-count" id="list-count"></span>
+      <div class="list-header" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <h2 class="list-title">All Events</h2>
+          <span class="list-count" id="list-count"></span>
+        </div>
+        <div class="select-wrap">
+          <select class="filter-select" id="filter-month" onchange="applyFilters()" style="font-weight:600;">
+            <option value="All">All Months</option>
+          </select>
+        </div>
       </div>
       <div id="list-body"></div>
     </div>
@@ -315,6 +358,26 @@ function buildFilterOptions() {
   const countries = ["Virtual", ...[...new Set(allEvents.map(e => e.country).filter(c => c !== "Virtual"))].sort()];
   const ctySel = document.getElementById("filter-country");
   countries.forEach(c => { const o = document.createElement("option"); o.value = c; o.textContent = c; ctySel.appendChild(o); });
+
+  // Build month options from actual event dates
+  const monthSet = new Set();
+  allEvents.forEach(ev => {
+    if (ev.date && ev.date.length >= 7) {
+      const d = new Date(ev.date + "T00:00:00");
+      if (!isNaN(d)) monthSet.add(d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2,"0"));
+    }
+  });
+  const sortedMonths = [...monthSet].sort();
+  const monSel = document.getElementById("filter-month");
+  if (monSel) {
+    sortedMonths.forEach(ym => {
+      const [y, m] = ym.split("-");
+      const o = document.createElement("option");
+      o.value = ym;
+      o.textContent = MONTHS[parseInt(m) - 1] + " " + y;
+      monSel.appendChild(o);
+    });
+  }
 }
 
 function applyFilters() {
@@ -322,16 +385,23 @@ function applyFilters() {
   const cat = document.getElementById("filter-category").value;
   const fmt = document.getElementById("filter-format").value;
   const cty = document.getElementById("filter-country").value;
+  const monEl = document.getElementById("filter-month");
+  const mon = monEl ? monEl.value : "All";
 
   filteredEvents = allEvents.filter(ev => {
     if (cat !== "All" && ev.category !== cat) return false;
     if (fmt !== "All" && ev.format !== fmt) return false;
     if (cty !== "All" && ev.country !== cty) return false;
     if (search && !ev.title.toLowerCase().includes(search) && !ev.city.toLowerCase().includes(search)) return false;
+    if (mon !== "All" && ev.date) {
+      const d = new Date(ev.date + "T00:00:00");
+      const evYM = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2,"0");
+      if (evYM !== mon) return false;
+    }
     return true;
   });
 
-  const hasFilters = cat !== "All" || fmt !== "All" || cty !== "All" || search;
+  const hasFilters = cat !== "All" || fmt !== "All" || cty !== "All" || search || mon !== "All";
   document.getElementById("clear-btn").style.display = hasFilters ? "block" : "none";
 
   if (currentView === "calendar") renderCalendar();
@@ -343,6 +413,8 @@ function clearFilters() {
   document.getElementById("filter-category").value = "All";
   document.getElementById("filter-format").value = "All";
   document.getElementById("filter-country").value = "All";
+  const monEl = document.getElementById("filter-month");
+  if (monEl) monEl.value = "All";
   applyFilters();
 }
 
